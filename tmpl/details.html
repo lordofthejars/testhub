@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Build Summary</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.42.0/css/patternfly.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.42.0/css/patternfly-additions.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+</head>
+
+<body class="cards-pf">
+
+    <!-- nav -->
+    <nav class="navbar navbar-default navbar-pf" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">
+                Build {{.ID}} of Project {{.Project}}
+            </a>
+        </div>
+    </nav>
+
+    <!-- SUMMARY -->
+    <div class="container-fluid container-cards-pf">
+        <div class="row row-cards-pf">
+            <div class="col-xs-6 col-sm-4 col-md-4">
+                <div class="card-pf card-pf-accented card-pf-aggregate-status">
+                    <h2 class="card-pf-title">
+                        <a href="#">
+                            <span style="color:green"class="fa fa-circle-check"></span>
+                            <span class="card-pf-aggregate-status-count">{{.NumberOfTests}}</span> Tests</a>
+                    </h2>
+                    <div class="card-pf-body">
+                        <p class="card-pf-aggregate-status-notifications">
+                            <span class="card-pf-aggregate-status-notification">
+                                <a href="#">
+                                    <span style="color:red" class="fa fa-times-circle"></span>{{.NumberOfFailures}}</a>
+                            </span>
+                            <span class="card-pf-aggregate-status-notification">
+                                <a href="#">
+                                    <span style="color:purple" class="fa fa-exclamation-circle"></span>{{.NumberOfErrors}}</a>
+                            </span>
+                            <span class="card-pf-aggregate-status-notification">
+                                <a href="#">
+                                    <span style="color:orange" class="fa fa-paper-plane"></span>{{.NumberOfSkips}}</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ALL TESTS -->
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="list-group list-view-pf">
+                        {{range .Tests}}
+                        <div data-link="details.html" class="list-group-item">
+                            <a href="#" class="list-group-item-link"></a>
+                            <div class="list-view-pf-main-info">
+                                <div class="list-view-pf-left">
+                                    <span style="color:green" class="fa fa-check-circle list-view-pf-icon-sm"></span>
+                                </div>
+                                <div class="list-view-pf-body">
+                                    <div class="list-view-pf-description">
+                                        <div class="list-group-item-text">
+                                            {{.Name}}
+                                        </div>
+                                    </div>
+                                    <div class="list-view-pf-additional-info">
+                                        <div class="list-view-pf-additional-info-item">
+                                            <span class="fa fa-stethoscope"></span>
+                                            <strong>{{.Total}}</strong> Tests
+                                        </div>
+                                        <div class="list-view-pf-additional-info-item">
+                                            <span style="color:red" class="fa fa-times-circle"></span>
+                                            <strong>{{.Failures}}</strong> Failures
+                                        </div>
+                                        <div class="list-view-pf-additional-info-item">
+                                            <span style="color:purple" class="fa fa-exclamation-circle"></span>
+                                            <strong>{{.Errors}}</strong> Errors
+                                        </div>
+                                        <div class="list-view-pf-additional-info-item">
+                                            <span style="color:orange" class="fa fa-paper-plane"></span>
+                                            <strong>{{.Skipped}}</strong> Skipped
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{end}}
+                        <!-- list-group-item -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- container -->
+
+        <script>
+            // Row Checkbox Selection
+            $(document).ready(function () {
+
+                // Row navigation to contents/details page
+                $(".list-group-item").click(function (e) {
+                    var target = e.target;
+                    //check if clicked element is a div, and not <a>, button or input
+                    if ($(target).is('div')) {
+                        window.location = $(this).data("link");
+                    }
+                });
+
+            });
+
+        </script>
+        <script>
+            $(function () {
+                // matchHeight the contents of each .card-pf and then the .card-pf itself
+                $(".row-cards-pf > [class*='col'] > .card-pf .card-pf-title").matchHeight();
+                $(".row-cards-pf > [class*='col'] > .card-pf > .card-pf-body").matchHeight();
+                $(".row-cards-pf > [class*='col'] > .card-pf > .card-pf-footer").matchHeight();
+                $(".row-cards-pf > [class*='col'] > .card-pf").matchHeight();
+            });
+        </script>
+</body>
+
+</html>
