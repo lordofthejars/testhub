@@ -35,7 +35,11 @@
                 <div class="card-pf card-pf-accented card-pf-aggregate-status">
                     <h2 class="card-pf-title">
                         <a href="#">
-                            <span style="color:green"class="fa fa-circle-check"></span>
+                            {{if .Success}}
+                                <span style="color:green"class="fa fa-circle-check"></span>
+                            {{else}}
+                                <span style="color:red"class="fa fa-times-check"></span>
+                            {{end}}
                             <span class="card-pf-aggregate-status-count">{{.NumberOfTests}}</span> Tests</a>
                     </h2>
                     <div class="card-pf-body">

@@ -32,7 +32,8 @@ func (tsr TestSuiteResult) IsSuccess() bool {
 }
 
 type TestResult struct {
-	Name string
+	Name    string
+	Success bool
 	Total,
 	Failures,
 	Errors,
@@ -89,7 +90,7 @@ func LoadTestResult(filepath string) (TestResult, error) {
 		return TestResult{}, err
 	}
 
-	return TestResult{tr.Name, tr.Summary.Total, tr.Summary.Failures, tr.Summary.Errors, tr.Summary.Skipped}, nil
+	return TestResult{tr.Name, tr.Summary.Failures+tr.Summary.Errors == 0, tr.Summary.Total, tr.Summary.Failures, tr.Summary.Errors, tr.Summary.Skipped}, nil
 }
 
 func CreateTestSuite(files []string) (TestSuiteResult, error) {
