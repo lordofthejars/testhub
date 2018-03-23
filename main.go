@@ -121,8 +121,6 @@ func ShowBuildDetailPage(w http.ResponseWriter, r *http.Request) {
 func ShowBuildsPage(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	fmt.Println("HHH")
-
 	currentProject := params["project"]
 
 	hub.Debug("Finding builds for project: %s", currentProject)

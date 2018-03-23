@@ -28,7 +28,7 @@ type Project struct {
 
 type Build struct {
 	ID            string `json:"id"`
-	Result        bool   `json:"result"`
+	Success       bool   `json:"success"`
 	NumberOfTests int    `json:"numberTests"`
 	Created       string `json:"created"`
 }

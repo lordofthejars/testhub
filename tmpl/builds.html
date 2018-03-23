@@ -44,7 +44,11 @@
                 <span class="card-pf-item-text">{{.NumberOfTests}}</span>
               </div>
               <div class="card-pf-item">
-                <span style="color:green" class="fa fa-check-circle"></span>
+                {{if .Success}}
+                  <span style="color:green" class="fa fa-check-circle"></span>
+                {{else}}
+                  <span style="color:red" class="fa fa-times-circle"></span>
+                {{end}}
               </div>
             </div>
             <p class="card-pf-info text-center"><strong>Registered</strong> <br/> {{.Created}}</p>
