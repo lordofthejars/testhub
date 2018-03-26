@@ -1,0 +1,10 @@
+package: github.com/lordofthejars/testhub
+import:
+- package: github.com/almighty/almighty-test-runner
+  subpackages:
+  - testresultparser
+- package: github.com/fatih/color
+  version: v1.6.0
+- package: github.com/gorilla/mux
+  version: v1.6.1
+- package: github.com/yargevad/filepathx

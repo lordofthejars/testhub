@@ -10,6 +10,8 @@
 # Unignore all dirs
 !*/
 
+!Makefile
+
 # Binaries for programs and plugins
 *.exe
 *.dll
@@ -29,3 +31,4 @@ public/
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
+vendor/
