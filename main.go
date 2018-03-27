@@ -1,189 +1,57 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"html/template"
-	"net/http"
-	"os/user"
-	"path/filepath"
+	"os"
 
-	"github.com/gorilla/mux"
 	"github.com/lordofthejars/testhub/hub"
+	"github.com/spf13/cobra"
 )
 
-func FindBuildSummary(w http.ResponseWriter, r *http.Request) {
+var configuration *hub.Config
 
-	params := mux.Vars(r)
-
-	project := params["project"]
-	build := params["build"]
-
-	buildDetail, error := hub.FindBuildDetail(resolveStorageDirectory(), project, build)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-	hub.Debug("Finding Summary for project: %s build: %s", project, build)
-
-	json.NewEncoder(w).Encode(buildDetail)
-}
-
-func RegisterTestRun(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-
-	project := params["project"]
-	build := params["build"]
-
-	fullPath, error := hub.CreateBuildLayout(resolveStorageDirectory(), project, build)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-	error = hub.UncompressContent(fullPath, r.Body)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-	testFiles, error := hub.GetTestFiles(fullPath)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-	testSuiteResult, error := hub.CreateTestSuite(testFiles)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-	error = testSuiteResult.WriteToJson(fullPath)
-
-	w.WriteHeader(http.StatusCreated)
-
-}
-
-func FindBuildsWithStatus(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-
-	currentProject := params["project"]
-
-	hub.Debug("Finding builds for project: %s", currentProject)
-
-	project, error := hub.FindBuildsWithStatus(resolveStorageDirectory(), currentProject)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-	json.NewEncoder(w).Encode(project)
-}
-
-func renderTemplate(w http.ResponseWriter, tmpl string, p interface{}) error {
-	templates, _ := template.ParseFiles(tmpl)
-	return templates.Execute(w, p)
-}
-
-func ShowBuildDetailPage(w http.ResponseWriter, r *http.Request) {
-
-	params := mux.Vars(r)
-
-	project := params["project"]
-	build := params["build"]
-
-	hub.Debug("Finding Summary for project: %s build: %s", project, build)
-
-	buildDetail, error := hub.FindBuildDetail(resolveStorageDirectory(), project, build)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-	error = renderTemplate(w, "tmpl/details.html", buildDetail)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-}
-
-func ShowBuildsPage(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-
-	currentProject := params["project"]
-
-	hub.Debug("Finding builds for project: %s", currentProject)
-
-	project, error := hub.FindBuildsWithStatus(resolveStorageDirectory(), currentProject)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-
-	error = renderTemplate(w, "tmpl/builds.html", project)
-
-	if error != nil {
-		sendError(w, error)
-		return
-	}
-}
-
-func sendError(w http.ResponseWriter, err error) {
-	// Should we add error message in header or somewhere in response?
-	hub.Error(err.Error())
-	switch err.(type) {
-	case *hub.InvalidLocation:
-		w.WriteHeader(http.StatusNotFound)
-	default:
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Error occured and request couldn't processed.")
-	}
-}
-
-func resolveStorageDirectory() string {
-	usr, _ := user.Current()
-	dir := usr.HomeDir
-
-	return filepath.Join(dir, ".hub")
-}
-
-func faviconHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "tmpl/favicon.ico")
+var RootCmd = &cobra.Command{
+	Use:   "testhub",
+	Short: "Interact with Test Hub",
 }
 
 func main() {
-	router := mux.NewRouter()
+	var repositoryPath string
 
-	router.HandleFunc("/api/{project}/{build}", RegisterTestRun).
-		Methods("POST").
-		Headers("Content-Type", "application/gzip")
+	var port int
+	var configPath string
 
-	router.HandleFunc("/api/{project}/{build}", FindBuildSummary).
-		Methods("GET")
+	var cmdStart = &cobra.Command{
+		Use:   "start [options]",
+		Short: "Start Test Hub server",
+		Long:  `start is used to start Test Hub server to collect test data`,
+		Run: func(cmd *cobra.Command, args []string) {
+			configuration, error := hub.NewConfig(configPath)
+			if error != nil {
+				hub.Error("Fatal Error while reading configuration: %s", error.Error())
+				os.Exit(-1)
+			}
 
-	router.HandleFunc("/api/{project}", FindBuildsWithStatus).
-		Methods("GET")
+			// Update with content provided by CLI flags
+			if port != 0 {
+				configuration.Port = port
+			}
 
-	router.HandleFunc("/{project}", ShowBuildsPage).
-		Methods("GET")
+			if len(repositoryPath) > 0 {
+				configuration.Repository.Path = repositoryPath
+			}
 
-	router.HandleFunc("/{project}/{build}", ShowBuildDetailPage).
-		Methods("GET")
+			hub.StartServer(configuration)
+		},
+	}
 
-	router.HandleFunc("/favicon.ico", faviconHandler)
-	hub.Info("TestHub Up and Running at %d", 8000)
+	cmdStart.Flags().IntVarP(&port, "port", "p", 0, "port to start Test Hub server")
+	cmdStart.Flags().StringVarP(&configPath, "config", "c", "", "configuration file for Test Hub")
+	cmdStart.Flags().StringVar(&repositoryPath, "repository.path", "", "Configures Test Hub to use disk repository to given path")
 
-	http.ListenAndServe(":8000", router)
+	RootCmd.AddCommand(cmdStart)
+
+	if err := RootCmd.Execute(); err != nil {
+		hub.Error(err.Error())
+		os.Exit(1)
+	}
 }

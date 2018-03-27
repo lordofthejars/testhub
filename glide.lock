@@ -1,5 +1,5 @@
 hash: e47eb4c21ff6d2de91907173a1a0ceebed94b2121967a3a05e2f2bc9ef7910bc
-updated: 2018-03-25T19:49:58.960919+02:00
+updated: 2018-03-26T19:37:34.766636+02:00
 imports:
 - name: github.com/almighty/almighty-test-runner
   version: 7a41e1a35cfeb2f56c4158e607bb11f54e1d7268
@@ -11,14 +11,22 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 53c1911da2b537f792e7cafcb446b05ffe33b996
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/mattn/go-colorable
   version: efa589957cd060542a26d2dd7832fd6a6c6c3ade
 - name: github.com/mattn/go-isatty
   version: 6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c
+- name: github.com/spf13/cobra
+  version: a1f051bc3eba734da4772d60e2d677f47cf93ef4
+- name: github.com/spf13/pflag
+  version: ee5fd03fd6acfd43e44aea0b4135958546ed8e73
 - name: github.com/yargevad/filepathx
   version: 907099cb5a626c26c0b04e01adca2798e63d030e
 - name: golang.org/x/sys
-  version: 91ee8cde435411ca3f1cd365e8f20131aed4d0a1
+  version: 13d03a9a82fba647c21a0ef8fba44a795d0f0835
   subpackages:
   - unix
+- name: gopkg.in/yaml.v2
+  version: 86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb
 testImports: []
