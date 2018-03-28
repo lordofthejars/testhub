@@ -37,7 +37,7 @@ func readConfig(filename string) (*Config, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		Info("No configuration file found, relaying to defaults")
-		config, err = defaultConfig(), nil
+		return defaultConfig(), nil
 	}
 	config, err = unmarshal(data)
 

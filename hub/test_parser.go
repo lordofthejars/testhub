@@ -13,6 +13,7 @@ type TestSuiteResult struct {
 	Failures,
 	Errors,
 	Skipped int
+	Time float64
 }
 
 func (tsr TestSuiteResult) AnyFailure() bool {
@@ -49,6 +50,7 @@ func (tsr *TestSuiteResult) countTestResult(testResult *testresultparser.TestRes
 	tsr.Failures += testResult.Summary.Failures
 	tsr.Errors += testResult.Summary.Errors
 	tsr.Skipped += testResult.Summary.Skipped
+	tsr.Time += testResult.Summary.Time
 }
 
 func (tsr *TestSuiteResult) LoadFromJson(destination string) error {

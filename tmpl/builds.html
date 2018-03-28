@@ -1,15 +1,19 @@
-
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Builds Summary</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.42.0/css/patternfly.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.42.0/css/patternfly-additions.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  </head>
-  <body class="cards-pf">
+<head>
+  <meta charset="utf-8">
+  <title>Builds Summary</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.42.0/css/patternfly.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.42.0/css/patternfly-additions.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.0/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.42.0/js/patternfly.min.js"></script>
+</head>
+
+<body class="cards-pf">
 
   <!-- nav -->
   <nav class="navbar navbar-default navbar-pf" role="navigation">
@@ -26,6 +30,68 @@
     </div>
   </nav>
 
+  <div class="container-fluid container-cards-pf">
+    <div class="row row-cards-pf">
+      <div class="col-xs-6 col-sm-4 col-md-4">
+        <div class="card-pf card-pf-accented card-pf-utilization">
+          <h2 class="card-pf-title">
+            Evolution Number Of Tests
+          </h2>
+          <div class="card-pf-body">
+            <p class="card-pf-utilization-details">
+              <span class="card-pf-utilization-card-details-count">{{.GetLastBuild.NumberOfTests}}</span>
+              <span class="card-pf-utilization-card-details-description">
+                <span class="card-pf-utilization-card-details-line-1">Tests</span>
+                <span class="card-pf-utilization-card-details-line-2">In Last Execution</span>
+              </span>
+            </p>
+            <div id="sparkline-chart-test-trend" class="chart-pf-sparkline"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        var c3ChartDefaults = $().c3ChartDefaults();
+        var sparklineChartConfig = c3ChartDefaults.getDefaultSparklineConfig();
+        sparklineChartConfig.bindto = '#sparkline-chart-test-trend';
+        sparklineChartConfig.data = {
+          columns: [
+            ['', {{.TestTrendJS }}],
+          ],
+        type: 'area'
+        };
+        var sparklineChart = c3.generate(sparklineChartConfig);
+      </script>
+      <div class="col-xs-6 col-sm-4 col-md-4">
+        <div class="card-pf card-pf-accented card-pf-utilization">
+          <h2 class="card-pf-title">
+            Evolution Execution Time
+          </h2>
+          <div class="card-pf-body">
+            <p class="card-pf-utilization-details">
+              <span class="card-pf-utilization-card-details-count">{{.GetLastBuild.Time}}</span>
+              <span class="card-pf-utilization-card-details-description">
+                <span class="card-pf-utilization-card-details-line-1">ms</span>
+                <span class="card-pf-utilization-card-details-line-2">In Last Execution</span>
+              </span>
+            </p>
+            <div id="sparkline-chart-test-time-trend" class="chart-pf-sparkline"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        var c3ChartDefaults = $().c3ChartDefaults();
+        var sparklineChartConfig = c3ChartDefaults.getDefaultSparklineConfig();
+        sparklineChartConfig.bindto = '#sparkline-chart-test-time-trend';
+        sparklineChartConfig.data = {
+          columns: [
+            ['', {{.TimeTrendJS }}],
+                  ],
+        type: 'area'
+                };
+        var sparklineChart = c3.generate(sparklineChartConfig);
+      </script>
+    </div>
+  </div>
   <div class="container-fluid container-cards-pf">
     <div class="row row-cards-pf">
       {{range .Builds}}
@@ -45,13 +111,15 @@
               </div>
               <div class="card-pf-item">
                 {{if .Success}}
-                  <span style="color:green" class="fa fa-check-circle"></span>
+                <span style="color:green" class="fa fa-check-circle"></span>
                 {{else}}
-                  <span style="color:red" class="fa fa-times-circle"></span>
+                <span style="color:red" class="fa fa-times-circle"></span>
                 {{end}}
               </div>
             </div>
-            <p class="card-pf-info text-center"><strong>Registered</strong> <br/> {{.Created}}</p>
+            <p class="card-pf-info text-center">
+              <strong>Registered</strong>
+              <br/> {{.CreatedTime}}</p>
           </div>
         </div>
       </div>
@@ -59,21 +127,22 @@
     </div>
   </div>
   <script>
-    $(function() {
+    $(function () {
       // matchHeight the contents of each .card-pf and then the .card-pf itself
       $(".row-cards-pf > [class*='col'] > .card-pf > .card-pf-body").matchHeight();
     });
-    $(document).ready(function() {
+    $(document).ready(function () {
       // Card navigation to contents/details page
-      $(".card-pf").click(function(e){
+      $(".card-pf").click(function (e) {
         var target = e.target;
         //check if clicked element is a div, and not <a>, button or input
-        if($(target).is('div')) {
+        if ($(target).is('div')) {
           window.location = $(this).data("link");
         }
       });
 
     });
   </script>
-  </body>
+</body>
+
 </html>

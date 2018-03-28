@@ -4,11 +4,15 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/yargevad/filepathx"
 )
@@ -26,11 +30,54 @@ type Project struct {
 	Builds  []Build `json:"builds"`
 }
 
+func (p Project) orderBuild() {
+	sort.Slice(p.Builds, func(i, j int) bool {
+		return p.Builds[i].Created.Before(p.Builds[j].Created)
+	})
+}
+
+func (p Project) GetLastBuild() Build {
+	return p.Builds[len(p.Builds)-1]
+}
+
+func (p Project) TestTrend() []string {
+	var values []string
+
+	for _, build := range p.Builds {
+		values = append(values, strconv.Itoa(build.NumberOfTests))
+	}
+	return values
+
+}
+
+func (p Project) TimeTrend() []string {
+	var values []string
+
+	for _, build := range p.Builds {
+		values = append(values, strconv.FormatFloat(build.Time, 'E', -1, 64))
+	}
+	return values
+}
+
+func (p Project) TimeTrendJS() template.JS {
+	return template.JS(strings.Join(p.TimeTrend(), ","))
+}
+
+func (p Project) TestTrendJS() template.JS {
+	return template.JS(strings.Join(p.TestTrend(), ","))
+}
+
 type Build struct {
-	ID            string `json:"id"`
-	Success       bool   `json:"success"`
-	NumberOfTests int    `json:"numberTests"`
-	Created       string `json:"created"`
+	ID            string    `json:"id"`
+	Success       bool      `json:"success"`
+	NumberOfTests int       `json:"numberTests"`
+	Created       time.Time `json:"created"`
+	Time          float64   `json:"time"`
+}
+
+func (b Build) CreatedTime() string {
+	const layout = "Jan 2, 2006 at 3:04pm"
+	return b.Created.Format(layout)
 }
 
 type BuildDetails struct {
@@ -78,7 +125,8 @@ func FindBuildDetail(home string, project string, module string) (BuildDetails, 
 		tests = append(tests, testResult)
 	}
 
-	return BuildDetails{Build{module, tsr.IsSuccess(), tsr.Total, stat.ModTime().Format(layout)}, project, tsr.Failures, tsr.Errors, tsr.Skipped, tests}, nil
+	return BuildDetails{
+		Build{module, tsr.IsSuccess(), tsr.Total, stat.ModTime(), tsr.Time}, project, tsr.Failures, tsr.Errors, tsr.Skipped, tests}, nil
 
 }
 
@@ -101,12 +149,13 @@ func FindBuildsWithStatus(home string, project string) (Project, error) {
 			return Project{}, err
 		}
 
-		const layout = "Jan 2, 2006 at 3:04pm"
 		buildID := moduleLocation[strings.LastIndex(moduleLocation, string(os.PathSeparator))+1:]
-		builds = append(builds, Build{buildID, tsr.IsSuccess(), tsr.Total, buildPath.ModTime().Format(layout)})
+		builds = append(builds, Build{buildID, tsr.IsSuccess(), tsr.Total, buildPath.ModTime(), tsr.Time})
 	}
 
-	return Project{project, builds}, nil
+	projectData := Project{project, builds}
+	projectData.orderBuild()
+	return projectData, nil
 
 }
 
