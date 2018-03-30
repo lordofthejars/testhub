@@ -11,7 +11,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.42.0/js/patternfly.min.js"></script>
-
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+    div.detail {
+        overflow-x: scroll;
+        overflow-y: scroll;
+        height: 300px
+    }
+    </style>
 </head>
 
 <body class="cards-pf">
@@ -39,9 +46,9 @@
                     <h2 class="card-pf-title">
                         <a href="#">
                             {{if .Success}}
-                                <span style="color:green"class="fa fa-circle-check"></span>
+                            <span style="color:green" class="fa fa-circle-check"></span>
                             {{else}}
-                                <span style="color:red"class="fa fa-times-check"></span>
+                            <span style="color:red" class="fa fa-times-check"></span>
                             {{end}}
                             <span class="card-pf-aggregate-status-count">{{.NumberOfTests}}</span> Tests</a>
                     </h2>
@@ -72,40 +79,125 @@
             <div class="row">
                 <div class="col-md-12">
 
-                    <div class="list-group list-view-pf">
-                        {{range .Tests}}
-                        <div data-link="details.html" class="list-group-item">
-                            <a href="#" class="list-group-item-link"></a>
-                            <div class="list-view-pf-main-info">
-                                <div class="list-view-pf-left">
-                                    <span style="color:green" class="fa fa-check-circle list-view-pf-icon-sm"></span>
+                    <div class="list-group tree-list-view-pf">
+                        {{range $index, $element := .Tests}}
+                        <div class="list-group-item">
+                            <div class="list-group-item-header">
+                                <div class="list-view-pf-expand">
+                                    <span class="fa fa-angle-right"></span>
                                 </div>
-                                <div class="list-view-pf-body">
-                                    <div class="list-view-pf-description">
-                                        <div class="list-group-item-text">
-                                            {{.Name}}
-                                        </div>
+                                <div class="list-view-pf-main-info">
+                                    <div class="list-view-pf-left">
+                                        {{if .Success}}
+                                        <span style="color:green" class="fa fa-check-circle list-view-pf-icon-sm list-view-pf-icon-success"></span>
+                                        {{else}}
+                                        <span style="color:red" class="fa fa-times-circle list-view-pf-icon-sm list-view-pf-icon-danger"></span>
+                                        {{end}}
                                     </div>
-                                    <div class="list-view-pf-additional-info">
-                                        <div class="list-view-pf-additional-info-item">
-                                            <span class="fa fa-stethoscope"></span>
-                                            <strong>{{.Total}}</strong> Tests
+                                    <div class="list-view-pf-body">
+                                        <div class="list-view-pf-description">
+                                            <div class="list-group-item-text">
+                                                {{.Name}}
+                                            </div>
                                         </div>
-                                        <div class="list-view-pf-additional-info-item">
-                                            <span style="color:red" class="fa fa-times-circle"></span>
-                                            <strong>{{.Failures}}</strong> Failures
-                                        </div>
-                                        <div class="list-view-pf-additional-info-item">
-                                            <span style="color:purple" class="fa fa-exclamation-circle"></span>
-                                            <strong>{{.Errors}}</strong> Errors
-                                        </div>
-                                        <div class="list-view-pf-additional-info-item">
-                                            <span style="color:orange" class="fa fa-paper-plane"></span>
-                                            <strong>{{.Skipped}}</strong> Skipped
+                                        <div class="list-view-pf-additional-info">
+                                            <div class="list-view-pf-additional-info-item">
+                                                <span class="fa fa-stethoscope"></span>
+                                                <strong>{{.Total}}</strong> Tests
+                                            </div>
+                                            <div class="list-view-pf-additional-info-item">
+                                                <span style="color:red" class="fa fa-times-circle"></span>
+                                                <strong>{{.Failures}}</strong> Failures
+                                            </div>
+                                            <div class="list-view-pf-additional-info-item">
+                                                <span style="color:purple" class="fa fa-exclamation-circle"></span>
+                                                <strong>{{.Errors}}</strong> Errors
+                                            </div>
+                                            <div class="list-view-pf-additional-info-item">
+                                                <span style="color:orange" class="fa fa-paper-plane"></span>
+                                                <strong>{{.Skipped}}</strong> Skipped
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <!-- Subs -->
+                            {{range $index2, $element2 := .TestMethods}}
+                            <div class="list-group-item-container container-fluid hidden">
+                                <div class="list-group-item">
+                                    <div class="list-group-item-header">
+                                        <div class="list-view-pf-actions">
+                                            <button class="btn btn-default" data-toggle="modal" data-target="#myModal{{$index}}{{$index2}}">Details</button>
+                                            <div class="modal fade" id="myModal{{$index}}{{$index2}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel{{$index}}{{$index2}}"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                                                <span class="pficon pficon-close"></span>
+                                                            </button>
+                                                            <h4 class="modal-title" id="myModalLabel{{$index}}{{$index2}}">Test Method Detail</h4>
+                                                        </div>
+                                                        <div class="modal-body">
+
+                                                            <div class="card-pf card-pf-view card-pf-view-xs">
+                                                                <div class="card-pf-body">
+                                                                    <h2 class="card-pf-title text-center">
+                                                                        {{$element.Name}}
+                                                                    </h2>
+                                                                    <p class="card-pf-info text-center">
+                                                                        <strong>{{.TestCase}}</strong>
+                                                                    </p>
+                                                                    <br/>
+                                                                    <div class="detail">
+                                                                        {{.Details}}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="list-view-pf-main-info">
+                                            <div class="list-view-pf-left">
+                                                {{if .IsPassed}}
+                                                <span style="color:green" class="fa fa-check-circle list-view-pf-icon-sm"></span>
+                                                {{end}} {{if .IsError}}
+                                                <span style="color:purple" class="fa fa-exclamation-circle list-view-pf-icon-sm"></span>
+                                                {{end}} {{if .IsSkipped}}
+                                                <span style="color:orange" class="fa fa-paper-plane list-view-pf-icon-sm"></span>
+                                                {{end}} {{if .IsFailure}}
+                                                <span style="color:red" class="fa fa-times-circle list-view-pf-icon-sm"></span>
+                                                {{end}}
+
+                                            </div>
+                                            <div class="list-view-pf-body">
+                                                <div class="list-view-pf-description">
+                                                    <div class="list-group-item-heading">
+                                                        {{.TestCase}}
+                                                    </div>
+                                                </div>
+                                                <div class="list-view-pf-additional-info">
+                                                    <div class="list-view-pf-additional-info-item">
+                                                        <span class="fa fa-hourglass-end"></span>
+                                                        {{.Time}} ms
+                                                    </div>
+                                                    {{if .IsTypeSet}}
+                                                    <div class="list-view-pf-additional-info-item">
+                                                        <span style="color:red" class="fa fa-exclamation-triangle"></span>
+                                                        {{.Type}}
+                                                    </div>
+                                                    {{end}}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            {{end}}
                         </div>
                         {{end}}
                         <!-- list-group-item -->
@@ -114,22 +206,34 @@
             </div>
         </div>
         <!-- container -->
-
         <script>
-            // Row Checkbox Selection
             $(document).ready(function () {
 
-                // Row navigation to contents/details page
-                $(".list-group-item").click(function (e) {
-                    var target = e.target;
-                    //check if clicked element is a div, and not <a>, button or input
-                    if ($(target).is('div')) {
-                        window.location = $(this).data("link");
+                // expand all child rows
+                $('#expand-tree').on('click', function () {
+                    $('.tree-list-view-pf').find(".list-group-item-container").filter(function () {
+                        return $(this).children().length > 0;
+                    }).removeClass('hidden');
+                });
+
+                // collapse all child rows
+                $('#collapse-tree').on('click', function () {
+                    $('.tree-list-view-pf').find(".list-group-item-container").addClass('hidden');
+                });
+
+                // click the list-view heading then expand a row
+                $('.list-group-item-header').click(function (event) {
+                    if (!$(event.target).is('button, a, input, .fa-ellipsis-v')) {
+                        var $this = $(this);
+                        $this.find('.fa-angle-right').toggleClass('fa-angle-down');
+                        var $itemContainer = $this.siblings('.list-group-item-container');
+                        if ($itemContainer.children().length) {
+                            $itemContainer.toggleClass('hidden');
+                        }
                     }
                 });
 
             });
-
         </script>
         <script>
             $(function () {

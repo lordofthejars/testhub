@@ -32,19 +32,6 @@ func (tsr TestSuiteResult) IsSuccess() bool {
 	return tsr.Failures == 0 && tsr.Errors == 0
 }
 
-type TestResult struct {
-	Name    string
-	Success bool
-	Total,
-	Failures,
-	Errors,
-	Skipped int
-}
-
-func (tsr TestResult) IsSuccess() bool {
-	return tsr.Failures == 0 && tsr.Errors == 0
-}
-
 func (tsr *TestSuiteResult) countTestResult(testResult *testresultparser.TestResults) {
 	tsr.Total += testResult.Summary.Total
 	tsr.Failures += testResult.Summary.Failures
@@ -84,6 +71,69 @@ func (tsr TestSuiteResult) WriteToJson(destination string) error {
 	return err
 }
 
+type TestResult struct {
+	Name    string
+	Success bool
+	Total,
+	Failures,
+	Errors,
+	Skipped int
+	TestMethods []TestMethod
+}
+
+type Result uint8
+
+const (
+	PASSED Result = iota + 1
+	SKIPPED
+	FAILURE
+	ERROR
+)
+
+type TestMethod struct {
+	TestCase string
+	Time     float64
+	Return   Result
+	Type     string
+	Message  string
+	Details  string
+}
+
+func (tm TestMethod) IsTypeSet() bool {
+	return len(tm.Type) > 0
+}
+
+func (tm TestMethod) IsPassed() bool {
+	return tm.Return == PASSED
+}
+
+func (tm TestMethod) IsSkipped() bool {
+	return tm.Return == SKIPPED
+}
+
+func (tm TestMethod) IsFailure() bool {
+	return tm.Return == FAILURE
+}
+
+func (tm TestMethod) IsError() bool {
+	return tm.Return == ERROR
+}
+
+func toResult(kind testresultparser.TestResultKind) Result {
+	switch kind {
+	case 1:
+		return PASSED
+	case 2:
+		return SKIPPED
+	case 3:
+		return FAILURE
+	case 4:
+		return ERROR
+	}
+
+	return 0
+}
+
 func LoadTestResult(filepath string) (TestResult, error) {
 
 	tr, err := parseSurefireReport(filepath)
@@ -92,7 +142,13 @@ func LoadTestResult(filepath string) (TestResult, error) {
 		return TestResult{}, err
 	}
 
-	return TestResult{tr.Name, tr.Summary.Failures+tr.Summary.Errors == 0, tr.Summary.Total, tr.Summary.Failures, tr.Summary.Errors, tr.Summary.Skipped}, nil
+	var testMethods []TestMethod
+
+	for _, result := range tr.Results {
+		testMethods = append(testMethods, TestMethod{result.TestCase, result.Time, toResult(result.Kind), result.Type, result.Message, result.Details})
+	}
+
+	return TestResult{tr.Name, tr.Summary.Failures+tr.Summary.Errors == 0, tr.Summary.Total, tr.Summary.Failures, tr.Summary.Errors, tr.Summary.Skipped, testMethods}, nil
 }
 
 func CreateTestSuite(files []string) (TestSuiteResult, error) {
