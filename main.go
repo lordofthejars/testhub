@@ -21,7 +21,7 @@ func main() {
 	var configPath string
 
 	var cmdStart = &cobra.Command{
-		Use:   "start [options]",
+		Use:   "start",
 		Short: "Start Test Hub server",
 		Long:  `start is used to start Test Hub server to collect test data`,
 		Run: func(cmd *cobra.Command, args []string) {
