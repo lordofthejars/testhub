@@ -257,7 +257,7 @@ func UncompressContent(destination string, r io.Reader) error {
 				return err
 			}
 			defer f.Close()
-
+			Debug("Uncompressing %s", target)
 			if _, err := io.Copy(f, tr); err != nil {
 				return err
 			}
