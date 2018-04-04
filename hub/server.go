@@ -69,6 +69,23 @@ func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func deleteBuild(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	project := params["project"]
+	build := params["build"]
+
+	Debug("Deleting build %s of project: %s", build, project)
+	error := DeleteBuild(resolveStorageDirectory(), project, build)
+
+	if error != nil {
+		sendError(w, error)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func findBuildsWithStatus(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -164,6 +181,9 @@ func StartServer(configuration *Config) {
 
 	router.HandleFunc("/api/{project}/{build}", findBuildSummary).
 		Methods("GET")
+
+	router.HandleFunc("/api/{project}/{build}", deleteBuild).
+		Methods("DELETE")
 
 	router.HandleFunc("/api/{project}", findBuildsWithStatus).
 		Methods("GET")

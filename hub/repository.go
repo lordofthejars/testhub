@@ -190,6 +190,16 @@ func CreateBuildLayout(home string, project string, build string) (string, error
 	return fullPath, err
 }
 
+func DeleteBuild(home, project, build string) error {
+	fullPath := filepath.Join(home, project, build)
+	if exists(fullPath) {
+		os.RemoveAll(fullPath)
+		return nil
+	}
+
+	return &InvalidLocation{fullPath}
+}
+
 func GetListOfBuilds(home string, project string) ([]os.FileInfo, error) {
 	fullPath := filepath.Join(home, project)
 	if exists(fullPath) {
