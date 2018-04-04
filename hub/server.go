@@ -29,7 +29,7 @@ func findBuildSummary(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(buildDetail)
 }
 
-func registerTestRun(w http.ResponseWriter, r *http.Request) {
+func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	project := params["project"]
@@ -158,9 +158,9 @@ func StartServer(configuration *Config) {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/{project}/{build}", registerTestRun).
+	router.HandleFunc("/api/{project}/{build}", registerSurefireTestRun).
 		Methods("POST").
-		Headers("Content-Type", "application/gzip")
+		Headers("Content-Type", "application/gzip", "x-testhub-type", "surefire")
 
 	router.HandleFunc("/api/{project}/{build}", findBuildSummary).
 		Methods("GET")
