@@ -1,5 +1,9 @@
 version ?= latest
 
+install:
+	glide install
+	go build -o testhub
+
 build:
 	go build -o testhub
 
