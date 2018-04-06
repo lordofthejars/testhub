@@ -70,6 +70,45 @@
                     </div>
                 </div>
             </div>
+            <div class="col-xs-6 col-sm-4 col-md-4">
+                <div class="card-pf card-pf-accented card-pf-aggregate-status">
+                    <h2 class="card-pf-title">
+                        <a target="_blank" href="{{.BuildURL}}">
+                            <span class="fa fa-cogs"></span>
+                            <span class="card-pf-aggregate-status-count">{{.ID}}</span>
+                        </a>
+                    </h2>
+                    <div class="card-pf-body">
+                        <p class="card-pf-aggregate-status-notifications">
+                            <span class="card-pf-aggregate-status-notification">
+                                <a 
+                                    data-toggle="tooltip" data-placement="top" title="{{.RepoURL}}"
+                                    target="_blank" href="{{.RepoURL}}">
+                                    <span  class="fa fa-git"></span>
+                                </a>
+                            </span>
+                            <span class="card-pf-aggregate-status-notification">
+                                <a 
+                                    {{if .IsBranchSet}}
+                                        data-toggle="tooltip" data-placement="top" title="{{.Branch}}"
+                                    {{end}}
+                                    href="{{.BranchURL}}">
+                                    <span class="fa fa-code-fork"></span>
+                                </a>
+                            </span>
+                            <span class="card-pf-aggregate-status-notification">
+                                <a 
+                                    {{if .IsCommitSet}}
+                                        data-toggle="tooltip" data-placement="top" title="{{.Commit}}"
+                                    {{end}}
+                                    href="{{.CommitURL}}">
+                                    <span class="fa fa-barcode"></span>
+                                </a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
@@ -243,6 +282,11 @@
                 $(".row-cards-pf > [class*='col'] > .card-pf > .card-pf-footer").matchHeight();
                 $(".row-cards-pf > [class*='col'] > .card-pf").matchHeight();
             });
+        </script>
+        <script>
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
         </script>
 </body>
 

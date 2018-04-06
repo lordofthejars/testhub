@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -63,10 +64,32 @@ func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	repo := getSingleQueryParam(r.URL.Query(), "repoUrl")
+	branch := getSingleQueryParam(r.URL.Query(), "branch")
+	commit := getSingleQueryParam(r.URL.Query(), "commit")
+	buildLocation := getSingleQueryParam(r.URL.Query(), "buildUrl")
+	repoType := getSingleQueryParam(r.URL.Query(), "repoType")
+
+	testSuiteResult.Branch = branch
+	testSuiteResult.RepoUrl = repo
+	testSuiteResult.Commit = commit
+	testSuiteResult.BuildUrl = buildLocation
+	testSuiteResult.RepoType = repoType
+
 	error = testSuiteResult.WriteToJson(fullPath)
 
 	w.WriteHeader(http.StatusCreated)
 
+}
+
+func getSingleQueryParam(queryParams url.Values, name string) string {
+	keys, err := queryParams[name]
+
+	if !err || len(keys) < 1 {
+		return ""
+	}
+
+	return keys[0]
 }
 
 func deleteBuild(w http.ResponseWriter, r *http.Request) {

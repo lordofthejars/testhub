@@ -73,6 +73,11 @@ type Build struct {
 	NumberOfTests int       `json:"numberTests"`
 	Created       time.Time `json:"created"`
 	Time          float64   `json:"time"`
+	BuildURL      string    `json:"buildUrl"`
+}
+
+func (b Build) IsBuildUrlSet() bool {
+	return len(b.BuildURL) > 0
 }
 
 func (b Build) CreatedTime() string {
@@ -86,7 +91,20 @@ type BuildDetails struct {
 	NumberOfFailures int          `json:"numberFailures"`
 	NumberOfErrors   int          `json:"numberErrors"`
 	NumberOfSkips    int          `json:"numberSkips"`
+	Commit           string       `json:"commit"`
+	CommitURL        string       `json:"commitUrl"`
+	Branch           string       `json:"branch"`
+	BranchURL        string       `json:"branchUrl"`
+	RepoURL          string       `json:"repoUrl"`
 	Tests            []TestResult `json:"tests"`
+}
+
+func (bd BuildDetails) IsCommitSet() bool {
+	return len(bd.Commit) > 0
+}
+
+func (bd BuildDetails) IsBranchSet() bool {
+	return len(bd.Branch) > 0
 }
 
 func FindBuildDetail(home string, project string, module string) (BuildDetails, error) {
@@ -126,7 +144,7 @@ func FindBuildDetail(home string, project string, module string) (BuildDetails, 
 	}
 
 	return BuildDetails{
-		Build{module, tsr.IsSuccess(), tsr.Total, stat.ModTime(), tsr.Time}, project, tsr.Failures, tsr.Errors, tsr.Skipped, tests}, nil
+		Build{module, tsr.IsSuccess(), tsr.Total, stat.ModTime(), tsr.Time, tsr.GetBuildUrl()}, project, tsr.Failures, tsr.Errors, tsr.Skipped, tsr.Commit, tsr.GetCommitUrl(), tsr.Branch, tsr.GetBranchUrl(), tsr.GetRepoUrl(), tests}, nil
 
 }
 
@@ -150,7 +168,7 @@ func FindBuildsWithStatus(home string, project string) (Project, error) {
 		}
 
 		buildID := moduleLocation[strings.LastIndex(moduleLocation, string(os.PathSeparator))+1:]
-		builds = append(builds, Build{buildID, tsr.IsSuccess(), tsr.Total, buildPath.ModTime(), tsr.Time})
+		builds = append(builds, Build{buildID, tsr.IsSuccess(), tsr.Total, buildPath.ModTime(), tsr.Time, tsr.BuildUrl})
 	}
 
 	projectData := Project{project, builds}

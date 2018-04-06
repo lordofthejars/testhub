@@ -14,6 +14,11 @@ type TestSuiteResult struct {
 	Errors,
 	Skipped int
 	Time float64
+	Branch,
+	Commit,
+	RepoUrl,
+	RepoType,
+	BuildUrl string
 }
 
 func (tsr TestSuiteResult) AnyFailure() bool {
@@ -30,6 +35,51 @@ func (tsr TestSuiteResult) AnySkipped() bool {
 
 func (tsr TestSuiteResult) IsSuccess() bool {
 	return tsr.Failures == 0 && tsr.Errors == 0
+}
+
+func (tsr TestSuiteResult) IsBranchSet() bool {
+	return len(tsr.Branch) > 0
+}
+
+func (tsr TestSuiteResult) IsCommitSet() bool {
+	return len(tsr.Commit) > 0
+}
+
+func (tsr TestSuiteResult) IsRepoUrlSet() bool {
+	return len(tsr.RepoUrl) > 0
+}
+
+func (tsr TestSuiteResult) IsBuildUrlSet() bool {
+	return len(tsr.BuildUrl) > 0
+}
+
+func (tsr TestSuiteResult) GetRepoUrl() string {
+	if tsr.IsRepoUrlSet() {
+		return tsr.RepoUrl
+	}
+
+	return "#"
+}
+
+func (tsr TestSuiteResult) GetBuildUrl() string {
+	if tsr.IsBuildUrlSet() {
+		return tsr.BuildUrl
+	}
+
+	return "#"
+}
+
+func (tsr TestSuiteResult) GetCommitUrl() string {
+	if tsr.IsCommitSet() && tsr.IsBuildUrlSet() {
+		return convertToCorrectCommitUrl(tsr.RepoUrl, tsr.Commit, tsr.RepoType)
+	}
+	return "#"
+}
+func (tsr TestSuiteResult) GetBranchUrl() string {
+	if tsr.IsBranchSet() && tsr.IsRepoUrlSet() {
+		return convertToCorrectBranchUrl(tsr.RepoUrl, tsr.Branch, tsr.RepoType)
+	}
+	return "#"
 }
 
 func (tsr *TestSuiteResult) countTestResult(testResult *testresultparser.TestResults) {
