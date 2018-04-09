@@ -1,3 +1,5 @@
 = TestHub
 
 TestHub is designed to make
+
+You can use xref:1.0@testhubclient::index.adoc[Test Hub Client]
