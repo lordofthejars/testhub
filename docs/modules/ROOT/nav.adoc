@@ -1,4 +1,6 @@
-.Basics
+* xref:index.adoc[Introduction to Test Hub]
 * xref:features.adoc[Features]
 
-.Development
+* Get Test Client
+** xref:supported-platforms.adoc[System Requirements]
+*** xref:installation.adoc[Install]

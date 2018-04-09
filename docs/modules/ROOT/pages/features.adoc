@@ -1,4 +1,18 @@
-= Features
+= How Test Hub Can Help
 
-TestHub offers to development process next features:
+Test Hub offers to development process next features:
 
+*Central Repository for Test reports*
+
+Test Hub acts as central server where everything related of test execution is stored.
+In this way you can always get test results from any build, check them in a better way rather than just inspecting terminal output.
+
+*Trend calculation*
+
+Since all test run history is stored in hub, Test Hub provides test trending data such as how the number of tests has been evolved or how test time behaves across runs.
+
+*Automatic categorize of tests*
+
+Test Hub can categorize tests for example as _slow tests_ and _very slow tests_ or for example do an assumption about _flaky_ tests
+
+IMPORTANT: Automatic categorization is something that currently is under discussion and not implemented yet.

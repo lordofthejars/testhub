@@ -1,5 +1,5 @@
-= TestHub
+= Test Hub
 
-TestHub is designed to make
+Test Hub is designed to act as central hub for storing test reports such as test result report, coverage report or video recording of test execution.
 
-You can use xref:1.0@testhubclient::index.adoc[Test Hub Client]
+Test Hub provides a REST API to connect with but you can also use xref:1.0@testhubclient::index.adoc[Test Hub Client] which is a CLI tool to interact with it.
