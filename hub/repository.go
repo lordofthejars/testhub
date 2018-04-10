@@ -148,6 +148,25 @@ func FindBuildDetail(home string, project string, module string) (BuildDetails, 
 
 }
 
+func FindAllProjects(home string) ([]string, error) {
+
+	var projectNames []string
+
+	files, err := ioutil.ReadDir(home)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if file.Mode().IsDir() {
+			projectNames = append(projectNames, file.Name())
+		}
+	}
+
+	return projectNames, nil
+}
+
 func FindBuildsWithStatus(home string, project string) (Project, error) {
 
 	buildsLocation, err := GetListOfBuilds(home, project)

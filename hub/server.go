@@ -178,6 +178,25 @@ func showBuildsPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func showProjects(w http.ResponseWriter, r *http.Request) {
+
+	Debug("Finding all projects")
+
+	projects, error := FindAllProjects(resolveStorageDirectory())
+
+	if error != nil {
+		sendError(w, error)
+		return
+	}
+
+	error = renderTemplate(w, "tmpl/projects.html", projects)
+
+	if error != nil {
+		sendError(w, error)
+		return
+	}
+}
+
 func sendError(w http.ResponseWriter, err error) {
 	// Should we add error message in header or somewhere in response?
 	Error(err.Error())
@@ -198,23 +217,29 @@ func StartServer(configuration *Config) {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/{project}/{build}", registerSurefireTestRun).
+	router.HandleFunc("/api/project/{project}/{build}", registerSurefireTestRun).
 		Methods("POST").
 		Headers("Content-Type", "application/gzip", "x-testhub-type", "surefire")
 
-	router.HandleFunc("/api/{project}/{build}", findBuildSummary).
+	router.HandleFunc("/api/project/{project}/{build}", findBuildSummary).
 		Methods("GET")
 
-	router.HandleFunc("/api/{project}/{build}", deleteBuild).
+	router.HandleFunc("/api/project/{project}/{build}", deleteBuild).
 		Methods("DELETE")
 
-	router.HandleFunc("/api/{project}", findBuildsWithStatus).
+	router.HandleFunc("/api/project/{project}", findBuildsWithStatus).
 		Methods("GET")
 
-	router.HandleFunc("/{project}", showBuildsPage).
+	router.HandleFunc("/", showProjects).
 		Methods("GET")
 
-	router.HandleFunc("/{project}/{build}", showBuildDetailPage).
+	router.HandleFunc("/project", showProjects).
+		Methods("GET")
+
+	router.HandleFunc("/project/{project}", showBuildsPage).
+		Methods("GET")
+
+	router.HandleFunc("/project/{project}/{build}", showBuildDetailPage).
 		Methods("GET")
 
 	router.HandleFunc("/favicon.ico", faviconHandler)

@@ -74,8 +74,7 @@
                 <div class="card-pf card-pf-accented card-pf-aggregate-status">
                     <h2 class="card-pf-title">
                         <a target="_blank" href="{{.BuildURL}}">
-                            <span class="fa fa-cogs"></span>
-                            <span class="card-pf-aggregate-status-count">{{.ID}}</span>
+                            <span class="card-pf-aggregate-status-count">Build Number {{.ID}}</span>
                         </a>
                     </h2>
                     <div class="card-pf-body">
@@ -105,6 +104,12 @@
                                     <span class="fa fa-barcode"></span>
                                 </a>
                             </span>
+                            <span class="card-pf-aggregate-status-notification">
+                                    <a data-toggle="tooltip" data-placement="top" title="{{.BuildURL}}"
+                                        href="{{.BuildURL}}">
+                                        <span class="fa fa-cogs"></span>
+                                    </a>
+                                </span>
                         </p>
                     </div>
                 </div>
