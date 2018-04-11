@@ -7,13 +7,12 @@ Assumptions:
 * [x] You have Test Hub CLI on `PATH` environment path variable.
 * [x] You've xref:1.0@testhubclient::installation.adoc[installed Test Hub client] to interact with Test Hub server.
 * [x] You've run a Maven test phase (`mvn clean test`) in a none multi-module project.
-* [x] 
 
 == Starting Test Hub
 
 To start Test Hub you only need to run next command from your terminal:
 
-~ $ testhub start
+`~ $ testhub start`
 
 After that you can go to http://localhost:8000 to access to the main page of Test Hub.
 If it is the first time you start Test Hub, then you will see an screen similar as:
@@ -34,13 +33,13 @@ Test Hub server opens a _REST API_ so anyone can interact with it without been t
 
 So move to the root of the project you want to publish test results to Test Hub, and after running `mvn clean test`, run next command:
 
-~ $ testhubclient --project hello-world --build 1
+`~ $ testhubclient --project hello-world --build 1`
 
 Notice that you can substitute the `project` name to the name of the project and the `build` represents the identifier of the build.
 Notice that in a CI/CD environment some variables are set as envirnoment variables, so you only need to reasign them to the flag.
 For example in _Travis CI_:
 
-~ $  testhubclient --project hello-world --build $TRAVIS_JOB_NUMBER
+`~ $  testhubclient --project hello-world --build $TRAVIS_JOB_NUMBER`
 
 Then just refresh home page http://localhost:8000 and you should see that now there is a new card box with the project.
 
