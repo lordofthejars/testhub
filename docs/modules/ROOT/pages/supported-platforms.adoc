@@ -1,4 +1,4 @@
-= Supported Platforms and System Requirements
+= Supported platforms and system requirements
 
 Test Hub is just a Go library so it can be natively compiled to many different operative systems and hardware.
 

@@ -1,4 +1,4 @@
-= How Test Hub Can Help
+= How Test Hub can help
 
 Test Hub offers to development process next features:
 

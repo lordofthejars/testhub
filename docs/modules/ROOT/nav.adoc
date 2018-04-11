@@ -1,6 +1,10 @@
 * xref:index.adoc[Introduction to Test Hub]
 * xref:features.adoc[Features]
 
-* Get Test Client
+* Get Test Hub
 ** xref:supported-platforms.adoc[System Requirements]
 *** xref:installation.adoc[Install]
+
+* xref:run-testhub.adoc[Run Test Hub]
+** xref:run-testhub.adoc#registering[Registering New Project]
+** xref:run-testhub.adoc#configuring[Configuring Test Hub]

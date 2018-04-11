@@ -1,5 +1,5 @@
 = Install
-:source-highlighter: highlightjs
+include::_attributes.adoc[]
 
 To install Test Hub you only need to go to release page on https://github.com/lordofthejars/testhub/releases[GitHub Release] select the platform and the version and download it.
 

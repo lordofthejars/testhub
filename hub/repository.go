@@ -152,6 +152,10 @@ func FindAllProjects(home string) ([]string, error) {
 
 	var projectNames []string
 
+	if !exists(home) {
+		return projectNames, nil
+	}
+
 	files, err := ioutil.ReadDir(home)
 
 	if err != nil {
