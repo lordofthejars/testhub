@@ -8,8 +8,11 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 )
+
+var box = packr.NewBox("../tmpl")
 
 func findBuildSummary(w http.ResponseWriter, r *http.Request) {
 
@@ -126,8 +129,14 @@ func findBuildsWithStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(project)
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p interface{}) error {
-	templates, _ := template.ParseFiles(tmpl)
+func renderTemplate(w http.ResponseWriter, tmplName string, p interface{}) error {
+	html, err := box.MustString(tmplName)
+
+	if err != nil {
+		return err
+	}
+
+	templates, _ := template.New(tmplName).Parse(html)
 	return templates.Execute(w, p)
 }
 
@@ -147,7 +156,7 @@ func showBuildDetailPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	error = renderTemplate(w, "tmpl/details.html", buildDetail)
+	error = renderTemplate(w, "details.html", buildDetail)
 
 	if error != nil {
 		sendError(w, error)
@@ -170,7 +179,7 @@ func showBuildsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	error = renderTemplate(w, "tmpl/builds.html", project)
+	error = renderTemplate(w, "builds.html", project)
 
 	if error != nil {
 		sendError(w, error)
@@ -189,7 +198,7 @@ func showProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	error = renderTemplate(w, "tmpl/projects.html", projects)
+	error = renderTemplate(w, "projects.html", projects)
 
 	if error != nil {
 		sendError(w, error)

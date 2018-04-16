@@ -23,3 +23,16 @@ In case of `Windows` you can run next commands:
 ren testhub_windows_amd64.exe testhub.exe
 set PATH=%PATH%;<testhubclient_directory>
 ----
+
+[#docker]
+== Docker
+
+Test Hub is also provided as Docker image.
+
+For example:
+
+`~ $  docker run -ti --rm -p 8000:8000 lordofthejars/testhub:<version>` 
+
+Just start Test Hub server at port `8000`.
+Notice that now all test reports are lost when container is stopped.
+Volume `/home/testhub/.hub` is also exposed so you can mount it to a local directory to not loose data when container is stopped.

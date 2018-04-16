@@ -1,5 +1,5 @@
-hash: e47eb4c21ff6d2de91907173a1a0ceebed94b2121967a3a05e2f2bc9ef7910bc
-updated: 2018-03-26T19:37:34.766636+02:00
+hash: 1e90af88a6f4443c82b1a7ba37680aff425f69cdfc53dd82ce21d0c3173f0f25
+updated: 2018-04-16T16:26:25.160451+02:00
 imports:
 - name: github.com/almighty/almighty-test-runner
   version: 7a41e1a35cfeb2f56c4158e607bb11f54e1d7268
@@ -7,6 +7,8 @@ imports:
   - testresultparser
 - name: github.com/fatih/color
   version: 507f6050b8568533fb3f5504de8e5205fa62a114
+- name: github.com/gobuffalo/packr
+  version: 7f4074995d431987caaa35088199f13c44b24440
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
@@ -17,6 +19,8 @@ imports:
   version: efa589957cd060542a26d2dd7832fd6a6c6c3ade
 - name: github.com/mattn/go-isatty
   version: 6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c
+- name: github.com/pkg/errors
+  version: 816c9085562cd7ee03e7f8188a1cfd942858cded
 - name: github.com/spf13/cobra
   version: a1f051bc3eba734da4772d60e2d677f47cf93ef4
 - name: github.com/spf13/pflag
