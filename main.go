@@ -19,6 +19,8 @@ func main() {
 
 	var port int
 	var configPath string
+	var cert string
+	var key string
 
 	var cmdStart = &cobra.Command{
 		Use:   "start",
@@ -40,13 +42,23 @@ func main() {
 				configuration.Repository.Path = repositoryPath
 			}
 
+			if len(cert) > 0 {
+				configuration.Cert = cert
+			}
+
+			if len(key) > 0 {
+				configuration.Key = key
+			}
+
 			hub.StartServer(configuration)
 		},
 	}
 
 	cmdStart.Flags().IntVarP(&port, "port", "p", 0, "port to start Test Hub server")
 	cmdStart.Flags().StringVarP(&configPath, "config", "c", "", "configuration file for Test Hub")
-	cmdStart.Flags().StringVar(&repositoryPath, "repository.path", "", "Configures Test Hub to use disk repository to given path")
+	cmdStart.Flags().StringVar(&repositoryPath, "repository.path", "", "configures Test Hub to use disk repository to given path")
+	cmdStart.Flags().StringVar(&cert, "cert", "", "configures location of certificate file to use in https")
+	cmdStart.Flags().StringVar(&key, "key", "", "configures location of key file to use in https")
 
 	RootCmd.AddCommand(cmdStart)
 

@@ -18,6 +18,12 @@ type RepositoryConfig struct {
 type Config struct {
 	Repository RepositoryConfig `yaml:"repository"`
 	Port       int              `yaml:"port"`
+	Cert       string           `yaml:"cert"`
+	Key        string           `yaml:"key"`
+}
+
+func (config Config) isSSLConfigured() bool {
+	return len(config.Cert) > 0 && len(config.Key) > 0
 }
 
 func NewConfig(configurationFile string) (*Config, error) {
@@ -49,7 +55,11 @@ func readConfig(filename string) (*Config, error) {
 
 func applyDefaults(config *Config) *Config {
 	if config.Port == 0 {
-		config.Port = 8000
+		if config.isSSLConfigured() {
+			config.Port = 443
+		} else {
+			config.Port = 8000
+		}
 	}
 
 	if len(config.Repository.Path) == 0 {

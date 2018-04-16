@@ -254,5 +254,9 @@ func StartServer(configuration *Config) {
 	router.HandleFunc("/favicon.ico", faviconHandler)
 	Info("TestHub Up and Running at %d and repository %s", configuration.Port, configuration.Repository.Path)
 
-	http.ListenAndServe(":"+strconv.Itoa(configuration.Port), router)
+	if configuration.isSSLConfigured() {
+		http.ListenAndServeTLS(":"+strconv.Itoa(configuration.Port), configuration.Cert, configuration.Key, router)
+	} else {
+		http.ListenAndServe(":"+strconv.Itoa(configuration.Port), router)
+	}
 }
