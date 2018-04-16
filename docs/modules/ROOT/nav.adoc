@@ -4,6 +4,7 @@
 * Get Test Hub
 ** xref:supported-platforms.adoc[System Requirements]
 *** xref:installation.adoc[Install]
+*** xref:installation.adoc#docker[Docker]
 
 * xref:run-testhub.adoc[Run Test Hub]
 ** xref:run-testhub.adoc#registering[Registering New Project]
