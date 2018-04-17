@@ -91,27 +91,27 @@ This operation supports next flags:
 |===
 |Option|Purpose|Format|Default
 
-|port
+|--port
 |Sets the port where Test Hub is started
 |integer
 |8000 (or 443 if `cert` and `key` options set)
 
-|cert
+|--cert
 |Sets the certificate file to use in https communication
 |File path
 |
 
-|key
+|--key
 |Sets the key file to use in https communication
 |File path
 |
 
-|repository.path
+|--repository.path
 |Path where project and build data is stored 
 |File Path
 |`~/.hub`
 
-|config
+|--config
 |Location of testhub.yml configuration file
 |File
 |.
