@@ -12,6 +12,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type AlreadyCreatedBuild struct {
+	Project string
+	Build   string
+}
+
+func (e *AlreadyCreatedBuild) Error() string {
+	return fmt.Sprintf("Project %s Build %s has been already published results", e.Project, e.Build)
+}
+
 var box = packr.NewBox("../tmpl")
 
 func findBuildSummary(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +52,11 @@ func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
 
 	if error != nil {
 		sendError(w, error)
+		return
+	}
+
+	if exists(fullPath) {
+		sendError(w, &AlreadyCreatedBuild{project, build})
 		return
 	}
 
@@ -214,7 +228,7 @@ func sendError(w http.ResponseWriter, err error) {
 		w.WriteHeader(http.StatusNotFound)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Error occured and request couldn't processed.")
+		fmt.Fprintf(w, "Error occured and request couldn't be processed: %s.", err.Error())
 	}
 }
 
