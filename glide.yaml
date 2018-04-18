@@ -11,3 +11,6 @@ import:
 - package: github.com/spf13/cobra
 - package: github.com/gobuffalo/packr/
   version: v1.11.0
+- package: github.com/dgrijalva/jwt-go
+  version: v3.2.0
+- package: github.com/auth0/go-jwt-middleware

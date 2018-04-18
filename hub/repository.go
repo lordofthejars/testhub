@@ -224,6 +224,11 @@ func GetBuildLayout(home string, project string, build string) (string, error) {
 
 func CreateBuildLayout(home string, project string, build string) (string, error) {
 	fullPath := filepath.Join(home, project, build)
+
+	if exists(fullPath) {
+		return "", &AlreadyCreatedBuildError{project, build}
+	}
+
 	err := os.MkdirAll(fullPath, 0755)
 
 	Debug("Directory %s created to store test results", fullPath)

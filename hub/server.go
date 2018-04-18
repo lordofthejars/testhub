@@ -10,16 +10,30 @@ import (
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
+	"github.com/lordofthejars/testhub/auth"
 )
 
-type AlreadyCreatedBuild struct {
+type AlreadyCreatedBuildError struct {
 	Project string
 	Build   string
 }
 
-func (e *AlreadyCreatedBuild) Error() string {
+func (e *AlreadyCreatedBuildError) Error() string {
 	return fmt.Sprintf("Project %s Build %s has been already published results", e.Project, e.Build)
 }
+
+type AuthenticationError struct {
+	Username string
+	Message  string
+}
+
+func (e *AuthenticationError) Error() string {
+	return fmt.Sprintf("Error authenticating %s user with %s", e.Username, e.Message)
+}
+
+var users *auth.Users
+var securityEnabled = false
+var configuration *Config
 
 var box = packr.NewBox("../tmpl")
 
@@ -52,11 +66,6 @@ func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
 
 	if error != nil {
 		sendError(w, error)
-		return
-	}
-
-	if exists(fullPath) {
-		sendError(w, &AlreadyCreatedBuild{project, build})
 		return
 	}
 
@@ -220,6 +229,40 @@ func showProjects(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func login(w http.ResponseWriter, r *http.Request) {
+	Debug("Login to server")
+
+	var content interface{}
+	json.NewDecoder(r.Body).Decode(&content)
+
+	contentAsMap := content.(map[string]interface{})
+
+	username, ok := contentAsMap["username"].(string)
+
+	if !ok {
+		sendError(w, &AuthenticationError{username, "Username field not found"})
+	}
+
+	password, ok := contentAsMap["password"].(string)
+	if !ok {
+		sendError(w, &AuthenticationError{username, "Password field not found"})
+	}
+
+	if users != nil {
+		if users.ValidateUser(username, password) {
+			token, err := auth.GenerateToken(username, "")
+
+			if err != nil {
+				sendError(w, err)
+			}
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, token)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+}
+
 func sendError(w http.ResponseWriter, err error) {
 	// Should we add error message in header or somewhere in response?
 	Error(err.Error())
@@ -236,18 +279,24 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "tmpl/favicon.ico")
 }
 
-func StartServer(configuration *Config) {
+func StartServer(config *Config) {
+
+	initializeUsers(*config)
+	configuration = config
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/project/{project}/{build}", registerSurefireTestRun).
+	router.HandleFunc("/api/login", login).
+		Methods("POST")
+
+	router.HandleFunc("/api/project/{project}/{build}", auth.WithJWT(configuration.Authentication.Secret, securityEnabled, registerSurefireTestRun)).
 		Methods("POST").
 		Headers("Content-Type", "application/gzip", "x-testhub-type", "surefire")
 
 	router.HandleFunc("/api/project/{project}/{build}", findBuildSummary).
 		Methods("GET")
 
-	router.HandleFunc("/api/project/{project}/{build}", deleteBuild).
+	router.HandleFunc("/api/project/{project}/{build}", auth.WithJWT(configuration.Authentication.Secret, securityEnabled, deleteBuild)).
 		Methods("DELETE")
 
 	router.HandleFunc("/api/project/{project}", findBuildsWithStatus).
@@ -266,11 +315,20 @@ func StartServer(configuration *Config) {
 		Methods("GET")
 
 	router.HandleFunc("/favicon.ico", faviconHandler)
-	Info("TestHub Up and Running at %d and repository %s", configuration.Port, configuration.Repository.Path)
+	Info("TestHub Up and Running at %d and repository %s and security enabled %t", configuration.Port, configuration.Repository.Path, securityEnabled)
 
 	if configuration.isSSLConfigured() {
 		http.ListenAndServeTLS(":"+strconv.Itoa(configuration.Port), configuration.Cert, configuration.Key, router)
 	} else {
 		http.ListenAndServe(":"+strconv.Itoa(configuration.Port), router)
 	}
+}
+
+func initializeUsers(configuration Config) {
+	users = auth.ReadUsersFromFile(configuration.Authentication.UsersPath)
+
+	if users.AreUsers() {
+		securityEnabled = true
+	}
+
 }

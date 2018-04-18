@@ -1,10 +1,14 @@
-hash: 1e90af88a6f4443c82b1a7ba37680aff425f69cdfc53dd82ce21d0c3173f0f25
-updated: 2018-04-16T16:26:25.160451+02:00
+hash: 0f3e0ac6dffd0dba50c3682ffa13d5b3fc5daebdb52fa916881e9df08e092f12
+updated: 2018-04-17T16:48:27.953065+02:00
 imports:
 - name: github.com/almighty/almighty-test-runner
   version: 7a41e1a35cfeb2f56c4158e607bb11f54e1d7268
   subpackages:
   - testresultparser
+- name: github.com/auth0/go-jwt-middleware
+  version: 5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd
+- name: github.com/dgrijalva/jwt-go
+  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
 - name: github.com/fatih/color
   version: 507f6050b8568533fb3f5504de8e5205fa62a114
 - name: github.com/gobuffalo/packr

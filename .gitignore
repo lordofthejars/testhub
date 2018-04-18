@@ -13,6 +13,8 @@
 !Makefile
 !Dockerfile
 
+users.yml
+
 # Binaries for programs and plugins
 *.exe
 *.dll

@@ -2,7 +2,6 @@ package hub
 
 import (
 	"io/ioutil"
-	"os"
 	"os/user"
 	"path/filepath"
 
@@ -15,11 +14,17 @@ type RepositoryConfig struct {
 	Path string `yaml:"path"`
 }
 
+type AuthenticationConfig struct {
+	Secret    string `yaml:"secret"`
+	UsersPath string `yaml:"userspath"`
+}
+
 type Config struct {
-	Repository RepositoryConfig `yaml:"repository"`
-	Port       int              `yaml:"port"`
-	Cert       string           `yaml:"cert"`
-	Key        string           `yaml:"key"`
+	Repository     RepositoryConfig     `yaml:"repository"`
+	Authentication AuthenticationConfig `yaml:"authentication"`
+	Port           int                  `yaml:"port"`
+	Cert           string               `yaml:"cert"`
+	Key            string               `yaml:"key"`
 }
 
 func (config Config) isSSLConfigured() bool {
@@ -48,7 +53,6 @@ func readConfig(filename string) (*Config, error) {
 	config, err = unmarshal(data)
 
 	config = applyDefaults(config)
-	os.Chdir(filepath.Dir(config.Repository.Path))
 
 	return config, err
 }

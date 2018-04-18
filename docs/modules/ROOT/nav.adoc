@@ -8,4 +8,5 @@
 
 * xref:run-testhub.adoc[Run Test Hub]
 ** xref:run-testhub.adoc#registering[Registering New Project]
+** xref:run-testhub.adoc#authentication[Authentication]
 ** xref:run-testhub.adoc#configuring[Configuring Test Hub]

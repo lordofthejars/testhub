@@ -78,6 +78,27 @@ If you click on test class, the list is expanded with information regarding each
 .Test Details
 image::test_details.png[]
 
+[#authentication]
+== Authentication
+
+By default Test Hub runs without any security enabled.
+This means that anyone can publish new testresults or delete ones.
+Although this might be good for demo purposes or if you are running inside your secured infrastructure, you might be want to restrict who can do these operations.
+
+Basic authentication approach has been implemented.
+Currently you only need to define a `users.yml` file at current workspace (or use `--authentication.userspath` flag to set current users file) and security will be enabled and after that only these users will be able to publish and delete test reports.
+
+An example of file can be:
+
+[source, yaml]
+.users.yaml
+----
+users:
+    - username: alex
+      password: alex
+
+----
+
 [#configuring]
 == Configuration of Test Hub
 
@@ -87,7 +108,7 @@ This operation supports next flags:
 
 [#cli-start-flags]
 .Start flags
-[cols="3,5,2,2a"]
+[cols="3,5a,2,2a"]
 |===
 |Option|Purpose|Format|Default
 
@@ -97,24 +118,34 @@ This operation supports next flags:
 |8000 (or 443 if `cert` and `key` options set)
 
 |--cert
-|Sets the certificate file to use in https communication
+|Sets the certificate file to use in `https` communication
 |File path
 |
 
 |--key
-|Sets the key file to use in https communication
+|Sets the key file to use in `https` communication
 |File path
 |
 
 |--repository.path
 |Path where project and build data is stored 
-|File Path
+|File path
 |`~/.hub`
 
 |--config
-|Location of testhub.yml configuration file
+|Location of `testhub.yml` configuration file
 |File
 |.
+
+|--authentication.userspath
+|Location of `users.yml` file
+|File path
+|`users.yml`
+
+|--authentication.secret
+|Secret used for signing JWT token
+|String
+|<internal one>
 |===
 
 === Configuration file

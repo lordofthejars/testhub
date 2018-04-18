@@ -21,6 +21,8 @@ func main() {
 	var configPath string
 	var cert string
 	var key string
+	var authUsersPath string
+	var authSecret string
 
 	var cmdStart = &cobra.Command{
 		Use:   "start",
@@ -33,7 +35,7 @@ func main() {
 				os.Exit(-1)
 			}
 
-			// Update with content provided by CLI flags
+			// Override configuration with content provided by CLI flags
 			if port != 0 {
 				configuration.Port = port
 			}
@@ -50,6 +52,14 @@ func main() {
 				configuration.Key = key
 			}
 
+			if len(authUsersPath) > 0 {
+				configuration.Authentication.UsersPath = authUsersPath
+			}
+
+			if len(authSecret) > 0 {
+				configuration.Authentication.Secret = authSecret
+			}
+
 			hub.StartServer(configuration)
 		},
 	}
@@ -59,6 +69,8 @@ func main() {
 	cmdStart.Flags().StringVar(&repositoryPath, "repository.path", "", "configures Test Hub to use disk repository to given path")
 	cmdStart.Flags().StringVar(&cert, "cert", "", "configures location of certificate file to use in https")
 	cmdStart.Flags().StringVar(&key, "key", "", "configures location of key file to use in https")
+	cmdStart.Flags().StringVarP(&authUsersPath, "authentication.userspath", "u", "", "configures the location of users file")
+	cmdStart.Flags().StringVarP(&authSecret, "authentication.secret", "s", "", "configures the secret to create JWT token")
 
 	RootCmd.AddCommand(cmdStart)
 
