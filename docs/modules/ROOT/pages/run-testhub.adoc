@@ -6,7 +6,7 @@ Assumptions:
 * [x] You've xref:installation.adoc[installed Test Hub] using any of the methods explained there.
 * [x] You have Test Hub CLI on `PATH` environment path variable.
 * [x] You've xref:1.0@testhubclient::installation.adoc[installed Test Hub client] to interact with Test Hub server.
-* [x] You've run a Maven test phase (`mvn clean test`) in a none multi-module project.
+* [x] You've run a Maven test phase (`mvn clean test`)
 
 == Starting Test Hub
 
