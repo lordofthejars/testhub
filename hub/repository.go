@@ -134,7 +134,15 @@ func FindBuildDetail(home string, project string, module string) (BuildDetails, 
 	var tests []TestResult
 
 	for _, file := range testFiles {
-		testResult, err := LoadTestResult(file)
+		var testResult TestResult
+		var err error
+
+		switch tsr.Type {
+		case SUREFIRE:
+			testResult, err = LoadTestResultFromSurefire(file)
+		case GRADLE:
+			testResult, err = LoadTestResultFromGradle(file)
+		}
 
 		if err != nil {
 			return BuildDetails{}, err

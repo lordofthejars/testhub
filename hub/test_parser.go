@@ -8,6 +8,13 @@ import (
 	"github.com/almighty/almighty-test-runner/testresultparser"
 )
 
+type TestType int
+
+const (
+	SUREFIRE TestType = 1 + iota
+	GRADLE
+)
+
 type TestSuiteResult struct {
 	Total,
 	Failures,
@@ -19,6 +26,7 @@ type TestSuiteResult struct {
 	RepoUrl,
 	RepoType,
 	BuildUrl string
+	Type TestType
 }
 
 func (tsr TestSuiteResult) AnyFailure() bool {
@@ -184,7 +192,7 @@ func toResult(kind testresultparser.TestResultKind) Result {
 	return 0
 }
 
-func LoadTestResult(filepath string) (TestResult, error) {
+func LoadTestResultFromSurefire(filepath string) (TestResult, error) {
 
 	tr, err := parseSurefireReport(filepath)
 
@@ -201,7 +209,24 @@ func LoadTestResult(filepath string) (TestResult, error) {
 	return TestResult{tr.Name, tr.Summary.Failures+tr.Summary.Errors == 0, tr.Summary.Total, tr.Summary.Failures, tr.Summary.Errors, tr.Summary.Skipped, testMethods}, nil
 }
 
-func CreateTestSuite(files []string) (TestSuiteResult, error) {
+func LoadTestResultFromGradle(filepath string) (TestResult, error) {
+
+	tr, err := parseGradleReport(filepath)
+
+	if err != nil {
+		return TestResult{}, err
+	}
+
+	var testMethods []TestMethod
+
+	for _, result := range tr.Results {
+		testMethods = append(testMethods, TestMethod{result.TestCase, result.Time, toResult(result.Kind), result.Type, result.Message, result.Details})
+	}
+
+	return TestResult{tr.Name, tr.Summary.Failures+tr.Summary.Errors == 0, tr.Summary.Total, tr.Summary.Failures, tr.Summary.Errors, tr.Summary.Skipped, testMethods}, nil
+}
+
+func CreateTestSuiteFromSurefire(files []string) (TestSuiteResult, error) {
 	tsr := TestSuiteResult{}
 	for _, file := range files {
 		tr, err := parseSurefireReport(file)
@@ -210,8 +235,28 @@ func CreateTestSuite(files []string) (TestSuiteResult, error) {
 			return tsr, err
 		}
 		tsr.countTestResult(tr)
+		tsr.Type = SUREFIRE
 	}
 	return tsr, nil
+}
+
+func CreateTestSuiteFromGradle(files []string) (TestSuiteResult, error) {
+	tsr := TestSuiteResult{}
+	for _, file := range files {
+		tr, err := parseGradleReport(file)
+
+		if err != nil {
+			return tsr, err
+		}
+		tsr.countTestResult(tr)
+		tsr.Type = GRADLE
+	}
+	return tsr, nil
+}
+
+func parseGradleReport(filepath string) (*testresultparser.TestResults, error) {
+	gradleParser := testresultparser.GradleParser{}
+	return gradleParser.Parse(filepath)
 }
 
 func parseSurefireReport(filepath string) (*testresultparser.TestResults, error) {

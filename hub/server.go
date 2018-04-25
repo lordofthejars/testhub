@@ -56,7 +56,8 @@ func findBuildSummary(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(buildDetail)
 }
 
-func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
+func registerTestRun(w http.ResponseWriter, r *http.Request, f func([]string) (TestSuiteResult, error)) {
+
 	params := mux.Vars(r)
 
 	project := params["project"]
@@ -83,7 +84,7 @@ func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	testSuiteResult, error := CreateTestSuite(testFiles)
+	testSuiteResult, error := f(testFiles)
 
 	if error != nil {
 		sendError(w, error)
@@ -105,7 +106,14 @@ func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
 	error = testSuiteResult.WriteToJson(fullPath)
 
 	w.WriteHeader(http.StatusCreated)
+}
 
+func registerSurefireTestRun(w http.ResponseWriter, r *http.Request) {
+	registerTestRun(w, r, CreateTestSuiteFromSurefire)
+}
+
+func registerGradleTestRun(w http.ResponseWriter, r *http.Request) {
+	registerTestRun(w, r, CreateTestSuiteFromGradle)
 }
 
 func getSingleQueryParam(queryParams url.Values, name string) string {
@@ -292,6 +300,10 @@ func StartServer(config *Config) {
 	router.HandleFunc("/api/project/{project}/{build}", auth.WithJWT(configuration.Authentication.Secret, securityEnabled, registerSurefireTestRun)).
 		Methods("POST").
 		Headers("Content-Type", "application/gzip", "x-testhub-type", "surefire")
+
+	router.HandleFunc("/api/project/{project}/{build}", auth.WithJWT(configuration.Authentication.Secret, securityEnabled, registerGradleTestRun)).
+		Methods("POST").
+		Headers("Content-Type", "application/gzip", "x-testhub-type", "gradle")
 
 	router.HandleFunc("/api/project/{project}/{build}", findBuildSummary).
 		Methods("GET")
