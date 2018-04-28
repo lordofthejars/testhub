@@ -4,23 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
+	"mime"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"github.com/lordofthejars/testhub/auth"
 )
-
-type AlreadyCreatedBuildError struct {
-	Project string
-	Build   string
-}
-
-func (e *AlreadyCreatedBuildError) Error() string {
-	return fmt.Sprintf("Project %s Build %s has been already published results", e.Project, e.Build)
-}
 
 type AuthenticationError struct {
 	Username string
@@ -54,6 +49,41 @@ func findBuildSummary(w http.ResponseWriter, r *http.Request) {
 	Debug("Finding Summary for project: %s build: %s", project, build)
 
 	json.NewEncoder(w).Encode(buildDetail)
+}
+
+func registerReportHtml(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	reportName := params["report"]
+	project := params["project"]
+	build := params["build"]
+
+	fullPath, err := CreateReportLayout(resolveStorageDirectory(), project, build, reportName)
+
+	if err != nil {
+		sendError(w, err)
+		return
+	}
+
+	err = UncompressContent(fullPath, r.Body)
+
+	if err != nil {
+		sendError(w, err)
+		return
+	}
+
+	// Updates report registry
+	tsr := TestSuiteResult{}
+	buildLocation, _ := GetBuildLayout(resolveStorageDirectory(), project, build)
+	tsr.LoadFromJson(buildLocation)
+
+	homePage := getSingleQueryParam(r.URL.Query(), "homePage")
+	if len(homePage) == 0 {
+		homePage = "index.html"
+	}
+	tsr.AddReport(reportName, homePage)
+	tsr.WriteToJson(buildLocation)
+	w.WriteHeader(http.StatusCreated)
+
 }
 
 func registerTestRun(w http.ResponseWriter, r *http.Request, f func([]string) (TestSuiteResult, error)) {
@@ -237,6 +267,77 @@ func showProjects(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func showHtmlReport(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	reportName := params["report"]
+	project := params["project"]
+	build := params["build"]
+	url := r.RequestURI
+	reportNameIndex := strings.Index(url, reportName)
+
+	reportUrlPart := url[reportNameIndex:len(url)]
+
+	if strings.HasPrefix(reportUrlPart, "/") {
+		reportUrlPart = reportUrlPart[1:len(reportUrlPart)]
+	}
+
+	if strings.Contains(reportUrlPart, "..") {
+		sendError(w, &InvalidLocation{reportUrlPart})
+	}
+
+	// remove query params
+	reportUrlPart = strings.Split(reportUrlPart, "?")[0]
+
+	path, err := FindReportHtmlResource(resolveStorageDirectory(), project, build, reportUrlPart)
+
+	if err != nil {
+		sendError(w, err)
+		return
+	}
+
+	openfile, err := os.Open(path)
+	defer openfile.Close()
+
+	if err != nil {
+		sendError(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", resolveContentType(path))
+	io.Copy(w, openfile)
+}
+
+func resolveContentType(path string) string {
+	extensionIndex := strings.LastIndex(path, ".")
+	extension := path[extensionIndex:len(path)]
+
+	mime := mime.TypeByExtension(extension)
+
+	if len(mime) == 0 {
+		mime = "application/octet-stream"
+	}
+
+	return mime
+	/*switch extension {
+	case ".css":
+		return "text/css"
+	case ".html":
+		return "text/html"
+	case ".htm":
+		return "text/htm"
+	case ".js":
+		return "application/javascript"
+	case ".png":
+		return "image/png"
+	case ".jpg":
+		return "image/jpeg"
+	case ".svg":
+		return "image/svg+xml"
+	}
+
+	return "text/plain"*/
+}
+
 func login(w http.ResponseWriter, r *http.Request) {
 	Debug("Login to server")
 
@@ -305,6 +406,10 @@ func StartServer(config *Config) {
 		Methods("POST").
 		Headers("Content-Type", "application/gzip", "x-testhub-type", "gradle")
 
+	router.HandleFunc("/api/project/{project}/{build}/report/{report}", auth.WithJWT(configuration.Authentication.Secret, securityEnabled, registerReportHtml)).
+		Methods("POST").
+		Headers("Content-Type", "application/gzip", "x-testhub-type", "html")
+
 	router.HandleFunc("/api/project/{project}/{build}", findBuildSummary).
 		Methods("GET")
 
@@ -324,6 +429,9 @@ func StartServer(config *Config) {
 		Methods("GET")
 
 	router.HandleFunc("/project/{project}/{build}", showBuildDetailPage).
+		Methods("GET")
+
+	router.PathPrefix("/project/{project}/{build}/report/{report}").HandlerFunc(showHtmlReport).
 		Methods("GET")
 
 	router.HandleFunc("/favicon.ico", faviconHandler)

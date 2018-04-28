@@ -17,12 +17,35 @@ import (
 	"github.com/yargevad/filepathx"
 )
 
+var (
+	reportDir = "report"
+)
+
 type InvalidLocation struct {
 	Location string
 }
 
 func (e *InvalidLocation) Error() string {
 	return fmt.Sprintf("%s path does not exists", e.Location)
+}
+
+type AlreadyCreatedBuildError struct {
+	Project string
+	Build   string
+}
+
+func (e *AlreadyCreatedBuildError) Error() string {
+	return fmt.Sprintf("Project %s Build %s has been already published results", e.Project, e.Build)
+}
+
+type AlreadyCreatedReportError struct {
+	Project string
+	Build   string
+	Report  string
+}
+
+func (e *AlreadyCreatedReportError) Error() string {
+	return fmt.Sprintf("Project %s Build %s Report %s has been already published", e.Project, e.Build, e.Report)
 }
 
 type Project struct {
@@ -67,6 +90,11 @@ func (p Project) TestTrendJS() template.JS {
 	return template.JS(strings.Join(p.TestTrend(), ","))
 }
 
+type Report struct {
+	Name string `json:"name"`
+	Home string `json:"home"`
+}
+
 type Build struct {
 	ID            string    `json:"id"`
 	Success       bool      `json:"success"`
@@ -97,6 +125,7 @@ type BuildDetails struct {
 	BranchURL        string       `json:"branchUrl"`
 	RepoURL          string       `json:"repoUrl"`
 	Tests            []TestResult `json:"tests"`
+	Reports          []Report     `json:"reports"`
 }
 
 func (bd BuildDetails) IsCommitSet() bool {
@@ -151,8 +180,14 @@ func FindBuildDetail(home string, project string, module string) (BuildDetails, 
 		tests = append(tests, testResult)
 	}
 
+	var reports []Report
+
+	for _, report := range tsr.Reports {
+		reports = append(reports, Report{report.Name, report.Home})
+	}
+
 	return BuildDetails{
-		Build{module, tsr.IsSuccess(), tsr.Total, stat.ModTime(), tsr.Time, tsr.GetBuildUrl()}, project, tsr.Failures, tsr.Errors, tsr.Skipped, tsr.Commit, tsr.GetCommitUrl(), tsr.Branch, tsr.GetBranchUrl(), tsr.GetRepoUrl(), tests}, nil
+		Build{module, tsr.IsSuccess(), tsr.Total, stat.ModTime(), tsr.Time, tsr.GetBuildUrl()}, project, tsr.Failures, tsr.Errors, tsr.Skipped, tsr.Commit, tsr.GetCommitUrl(), tsr.Branch, tsr.GetBranchUrl(), tsr.GetRepoUrl(), tests, reports}, nil
 
 }
 
@@ -228,6 +263,31 @@ func GetBuildLayout(home string, project string, build string) (string, error) {
 	}
 
 	return "", &InvalidLocation{fullPath}
+}
+
+func FindReportHtmlResource(home, project, build, reportName string) (string, error) {
+
+	fullPath := filepath.Join(home, project, build, reportDir, reportName)
+
+	if !exists(fullPath) {
+		return "", &InvalidLocation{fullPath}
+	}
+
+	return fullPath, nil
+}
+
+func CreateReportLayout(home, project, build, report string) (string, error) {
+	fullPath := filepath.Join(home, project, build, reportDir, report)
+
+	if exists(fullPath) {
+		return "", &AlreadyCreatedReportError{project, build, report}
+	}
+
+	err := os.MkdirAll(fullPath, 0755)
+
+	Debug("Directory %s created to store report %s", fullPath, report)
+
+	return fullPath, err
 }
 
 func CreateBuildLayout(home string, project string, build string) (string, error) {

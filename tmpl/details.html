@@ -106,10 +106,18 @@
                             </span>
                             <span class="card-pf-aggregate-status-notification">
                                     <a data-toggle="tooltip" data-placement="top" title="{{.BuildURL}}"
-                                        href="{{.BuildURL}}">
+                                        target="_blank" href="{{.BuildURL}}">
                                         <span class="fa fa-cogs"></span>
                                     </a>
-                                </span>
+                            </span>
+                            {{range .Reports}}
+                            <span class="card-pf-aggregate-status-notification">
+                                <a data-toggle="tooltip" data-placement="top" title="{{.Name}}"
+                                    target="_blank" href="{{$.ID}}/report/{{.Name}}/{{.Home}}">
+                                    <span class="fa fa-plus-square"></span>
+                                </a>
+                            </span>
+                            {{end}}
                         </p>
                     </div>
                 </div>

@@ -15,6 +15,11 @@ const (
 	GRADLE
 )
 
+type ReportInfo struct {
+	Name,
+	Home string
+}
+
 type TestSuiteResult struct {
 	Total,
 	Failures,
@@ -26,7 +31,8 @@ type TestSuiteResult struct {
 	RepoUrl,
 	RepoType,
 	BuildUrl string
-	Type TestType
+	Type    TestType
+	Reports []ReportInfo
 }
 
 func (tsr TestSuiteResult) AnyFailure() bool {
@@ -96,6 +102,10 @@ func (tsr *TestSuiteResult) countTestResult(testResult *testresultparser.TestRes
 	tsr.Errors += testResult.Summary.Errors
 	tsr.Skipped += testResult.Summary.Skipped
 	tsr.Time += testResult.Summary.Time
+}
+
+func (tsr *TestSuiteResult) AddReport(name, home string) {
+	tsr.Reports = append(tsr.Reports, ReportInfo{name, home})
 }
 
 func (tsr *TestSuiteResult) LoadFromJson(destination string) error {
