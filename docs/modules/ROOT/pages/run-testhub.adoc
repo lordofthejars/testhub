@@ -78,6 +78,16 @@ If you click on test class, the list is expanded with information regarding each
 .Test Details
 image::test_details.png[]
 
+=== HTML Reports
+
+Test Hub allows you to store any kind of `HTML` report as artifact and publish it as HTML webpage.
+If there are `HTML` reports, they are shown in build summary page as with plus icon.
+
+.HTMl Report
+image::extra_report.png[]
+
+To see how to publish `HTML` reports using Test Hub client just read xref:1.0@testhubclient::publish_test_report.adoc[Test Hub client documentation].
+
 [#authentication]
 == Authentication
 
