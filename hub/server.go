@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"mime"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -76,14 +78,35 @@ func registerReportHtml(w http.ResponseWriter, r *http.Request) {
 	buildLocation, _ := GetBuildLayout(resolveStorageDirectory(), project, build)
 	tsr.LoadFromJson(buildLocation)
 
-	homePage := getSingleQueryParam(r.URL.Query(), "homePage")
-	if len(homePage) == 0 {
-		homePage = "index.html"
-	}
+	homePage, _ := getHomePage(fullPath, r.URL.Query())
 	tsr.AddReport(reportName, homePage)
 	tsr.WriteToJson(buildLocation)
 	w.WriteHeader(http.StatusCreated)
 
+}
+
+func getHomePage(fullPath string, queryParams url.Values) (string, error) {
+	homePage := getSingleQueryParam(queryParams, "homePage")
+	if len(homePage) == 0 {
+		homePage = "index.html"
+	}
+
+	files, err := ioutil.ReadDir(fullPath)
+
+	if err != nil {
+		return "", err
+	}
+
+	// If only contains one file in current directory and it is a directory, it means that the root directory is inside this directory
+	if len(files) == 1 {
+		reportDir := filepath.Join(fullPath, files[0].Name())
+		stat, err := os.Stat(reportDir)
+		if err == nil && stat.IsDir() {
+			return filepath.Join(files[0].Name(), homePage), nil
+		}
+	}
+
+	return homePage, nil
 }
 
 func registerTestRun(w http.ResponseWriter, r *http.Request, f func([]string) (TestSuiteResult, error)) {
@@ -318,24 +341,6 @@ func resolveContentType(path string) string {
 	}
 
 	return mime
-	/*switch extension {
-	case ".css":
-		return "text/css"
-	case ".html":
-		return "text/html"
-	case ".htm":
-		return "text/htm"
-	case ".js":
-		return "application/javascript"
-	case ".png":
-		return "image/png"
-	case ".jpg":
-		return "image/jpeg"
-	case ".svg":
-		return "image/svg+xml"
-	}
-
-	return "text/plain"*/
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
